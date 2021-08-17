@@ -1,0 +1,26 @@
+{
+    "name": "hubculture/fireblocks-php-sdk",
+    "description": "PHP SDK for Fireblocks API",
+    "type": "library",
+    "authors": [
+        {
+            "name": "Tharanga Kothalawala",
+            "email": "tharanga.kothalawala@gmail.com"
+        }
+    ],
+    "require": {
+        "ext-json": "*",
+        "guzzlehttp/psr7": "^1.5@dev",
+        "guzzlehttp/guzzle": "^6.3@dev",
+        "firebase/php-jwt": "^v5.4"
+    },
+    "autoload": {
+        "psr-4": {
+            "Hub\\FireBlocksSdk\\": "src/"
+        }
+    },
+    "minimum-stability": "dev",
+    "suggest": {
+        "psr/log": "Include this and pass this to the library to use your existing logger to get debug output."
+    }
+}
