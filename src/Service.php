@@ -35,7 +35,7 @@ class Service
     /**
      * @var \Psr\Log\LoggerInterface logger for this class.
      */
-    protected $logger;
+    private $logger;
 
     /**
      * Service constructor.
@@ -51,6 +51,9 @@ class Service
     {
         if (empty($config['private_key_file'])) {
             throw new InvalidArgumentException("Missing 'private_key_file'. Visit https://docs.fireblocks.com/api/#issuing-api-credentials for more information.");
+        }
+        if (!is_readable($config['private_key_file'])) {
+            throw new InvalidArgumentException("File given in 'private_key_file' is not readable");
         }
         if (empty($config['api_key'])) {
             throw new InvalidArgumentException("Missing 'api_key'. Visit https://docs.fireblocks.com/api/#signing-a-request for instructions for obtaining such a key.");
@@ -190,7 +193,7 @@ class Service
     {
         return $this->rawRequest(
             $api,
-            array('body' => json_encode($params)),
+            array('body' => json_encode($params), 'headers' => ['content-type' => 'application/json']),
             $method
         );
     }
@@ -254,6 +257,8 @@ class Service
         $this->generateAccessToken($api, $payload);
         if (empty($payload['headers'])) {
             $payload['headers'] = $this->getHeaders();
+        } else {
+            $payload['headers'] = array_merge($payload['headers'], $this->getHeaders());
         }
 
         try {
@@ -303,19 +308,26 @@ class Service
      *
      * @param string      $uri The URI part of the request (e.g., /v1/transactions).
      * @param string|null $requestBody
+     *
+     * @see https://docs.fireblocks.com/api/?javascript#signing-a-request
      */
     private function generateAccessToken($uri, $requestBody = null)
     {
-        $nowUts = time();
         $payload = array(
-            "uri" => $uri, // The URI part of the request (e.g., /v1/transactions).
-            "nonce" => $nowUts, // Unique number or string. Each API request needs to have a different nonce.
-            "iat" => $nowUts, // The time at which the JWT was issued, in seconds since Epoch.
-            "exp" => $nowUts + self::SIGNED_TOKEN_EXPIRE_IN_SECONDS,
-            "sub" => $this->config['api_key'], // The API Key.
+            // The URI part of the request (e.g., /v1/transactions).
+            'uri' => $uri,
+            // Unique number or string. Each API request needs to have a different nonce.
+            'nonce' => rand(1000, getrandmax()),
+            // The time at which the JWT was issued, in seconds since Epoch.
+            'iat' => time(),
+            'exp' => time() + self::SIGNED_TOKEN_EXPIRE_IN_SECONDS,
+            // The API Key.
+            'sub' => $this->config['api_key'],
         );
-        if (!empty($requestBody) && is_array($requestBody)) {
-            $payload['bodyHash'] = sha1(serialize($requestBody));
+
+        // Hex-encoded SHA-256 hash of the raw HTTP request body
+        if (!empty($requestBody['body']) && is_string($requestBody['body'])) {
+            $payload['bodyHash'] = hash('sha256', $requestBody['body']);
         }
 
         $this->setAccessToken(

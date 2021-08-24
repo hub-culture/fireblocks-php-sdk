@@ -11,3 +11,5 @@ use Hub\FireBlocksSdk\AccountService;
 $service = new AccountService($config);
 $response = $service->getAccounts();
 var_dump($response);
+$response = $service->createNewVaultAccount("testaccount", true);
+var_dump($response);
