@@ -13,3 +13,5 @@ $response = $service->getAccounts();
 var_dump($response);
 $response = $service->createNewVaultAccount("testaccount", true);
 var_dump($response);
+$response = $service->getAccountById($response->getId());
+var_dump($response);

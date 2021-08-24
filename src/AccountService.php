@@ -55,4 +55,22 @@ class AccountService extends Service
 
         return new VaultAccount($response['id'], $response['name'], $response['hiddenOnUI']);
     }
+
+    /**
+     * Returns the requested Vault Account.
+     *
+     * @param int $vaultAccountId The ID of the Vault Account
+     *
+     * @return VaultAccount
+     */
+    public function getAccountById($vaultAccountId)
+    {
+        $response = $this->get('/v1/vault/accounts/' . $vaultAccountId);
+        if (empty($response['id'])) {
+            $this->log("createNewVaultAccount() : failed to create a new vault account");
+            return null;
+        }
+
+        return new VaultAccount($response['id'], $response['name'], $response['hiddenOnUI']);
+    }
 }

@@ -129,4 +129,18 @@ class VaultAccount
     {
         $this->assets = $assets;
     }
+
+    /**
+     * @return array
+     */
+    public function toArray()
+    {
+        return [
+            'id' => $this->getId(),
+            'name' => $this->getName(),
+            'hiddenOnUI' => $this->isHiddenOnUI(),
+            'autoFuel' => $this->isAutoFuel(),
+            'assets' => $this->getAssets(),
+        ];
+    }
 }
